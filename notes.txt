@@ -1,0 +1,15 @@
+curl -s -X POST https://gql.hashnode.com \
+  -H "Content-Type: application/json" \
+  -H "Authorization: $TOKEN" \
+  -d @- <<EOF
+{
+  "query": "mutation CreateDraft(\$input: CreateDraftInput!) { createDraft(input: \$input) { _id title } }",
+  "variables": {
+    "input": {
+      "title": "Docs vs Blog: What's Better for Developer-Facing Content?",
+      "contentMarkdown": "$MARKDOWN",
+      "publicationId": "$PUBLICATION_ID"
+    }
+  }
+}
+EOF
