@@ -8,7 +8,7 @@ inputs:
     description: "Your Hashnode publication ID"
     required: true
   file_path:
-    description: "Path to the markdown file to publish"
+    description: "Path to the markdown file or directory to publish"
     required: true
   is_draft:
     description: "Create as draft instead of publishing immediately"
@@ -16,6 +16,10 @@ inputs:
     default: "false"
   dry_run:
     description: "Validate the markdown file without publishing"
+    required: false
+    default: "false"
+  recursive:
+    description: "If file_path is a directory, recursively process all markdown files"
     required: false
     default: "false"
 outputs:

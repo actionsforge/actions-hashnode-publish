@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { Stats } from 'fs'
 
 // ✅ Define spies inside the factory
 vi.mock('@actions/core', () => {
@@ -51,6 +52,8 @@ describe('GitHub Action', () => {
       }
     })
 
+    vi.mocked(fs.existsSync).mockReturnValue(true)
+    vi.mocked(fs.statSync).mockReturnValue({ isFile: () => true, isDirectory: () => false } as Stats)
     vi.mocked(fs.readFileSync).mockReturnValue(mockContent)
     vi.mocked(validateMarkdown).mockReturnValue(mockValidation)
     vi.mocked(parseMarkdown).mockReturnValue(mockMetadata)
@@ -98,6 +101,8 @@ describe('GitHub Action', () => {
       }
     })
 
+    vi.mocked(fs.existsSync).mockReturnValue(true)
+    vi.mocked(fs.statSync).mockReturnValue({ isFile: () => true, isDirectory: () => false } as Stats)
     vi.mocked(fs.readFileSync).mockReturnValue(mockContent)
     vi.mocked(validateMarkdown).mockReturnValue(mockValidation)
     vi.mocked(parseMarkdown).mockReturnValue(mockMetadata)
@@ -145,6 +150,8 @@ describe('GitHub Action', () => {
       }
     })
 
+    vi.mocked(fs.existsSync).mockReturnValue(true)
+    vi.mocked(fs.statSync).mockReturnValue({ isFile: () => true, isDirectory: () => false } as Stats)
     vi.mocked(fs.readFileSync).mockReturnValue(mockContent)
     vi.mocked(validateMarkdown).mockReturnValue(mockValidation)
     vi.mocked(parseMarkdown).mockReturnValue(mockMetadata)
@@ -188,6 +195,8 @@ describe('GitHub Action', () => {
       }
     })
 
+    vi.mocked(fs.existsSync).mockReturnValue(true)
+    vi.mocked(fs.statSync).mockReturnValue({ isFile: () => true, isDirectory: () => false } as Stats)
     vi.mocked(fs.readFileSync).mockReturnValue(mockContent)
     vi.mocked(validateMarkdown).mockReturnValue(mockValidation)
     vi.mocked(parseMarkdown).mockReturnValue(mockMetadata)
@@ -221,6 +230,8 @@ describe('GitHub Action', () => {
       }
     })
 
+    vi.mocked(fs.existsSync).mockReturnValue(true)
+    vi.mocked(fs.statSync).mockReturnValue({ isFile: () => true, isDirectory: () => false } as Stats)
     vi.mocked(fs.readFileSync).mockReturnValue(mockContent)
     vi.mocked(validateMarkdown).mockReturnValue(mockValidation)
     vi.mocked(parseMarkdown).mockReturnValue(mockMetadata)
@@ -249,12 +260,14 @@ describe('GitHub Action', () => {
       }
     })
 
+    vi.mocked(fs.existsSync).mockReturnValue(true)
+    vi.mocked(fs.statSync).mockReturnValue({ isFile: () => true, isDirectory: () => false } as Stats)
     vi.mocked(fs.readFileSync).mockReturnValue(mockContent)
     vi.mocked(validateMarkdown).mockReturnValue(mockValidation)
 
     await runAction()
 
-    expect(core.setFailed).toHaveBeenCalledWith('Validation failed:\nError 1\nError 2')
+    expect(core.setFailed).toHaveBeenCalledWith('Validation failed for test.md:\nError 1\nError 2')
     expect(publishToHashnode).not.toHaveBeenCalled()
   })
 
@@ -279,6 +292,8 @@ describe('GitHub Action', () => {
       }
     })
 
+    vi.mocked(fs.existsSync).mockReturnValue(true)
+    vi.mocked(fs.statSync).mockReturnValue({ isFile: () => true, isDirectory: () => false } as Stats)
     vi.mocked(fs.readFileSync).mockReturnValue(mockContent)
     vi.mocked(validateMarkdown).mockReturnValue(mockValidation)
     vi.mocked(parseMarkdown).mockReturnValue(mockMetadata)
@@ -286,6 +301,92 @@ describe('GitHub Action', () => {
 
     await runAction()
 
-    expect(core.setFailed).toHaveBeenCalledWith('API Error')
+    expect(core.setFailed).toHaveBeenCalledWith('Error processing test.md: API Error')
+  })
+
+  it('should fail if file does not exist', async () => {
+    vi.mocked(core.getInput).mockImplementation((name) => {
+      switch (name) {
+        case 'token': return 'test-token'
+        case 'publication_id': return 'test-pub'
+        case 'file_path': return 'test.md'
+        default: return ''
+      }
+    })
+
+    vi.mocked(fs.existsSync).mockReturnValue(false)
+
+    await runAction()
+
+    expect(core.setFailed).toHaveBeenCalledWith('Path does not exist: test.md')
+    expect(publishToHashnode).not.toHaveBeenCalled()
+  })
+
+  it('should fail if path is a directory but recursive is not enabled', async () => {
+    vi.mocked(core.getInput).mockImplementation((name) => {
+      switch (name) {
+        case 'token': return 'test-token'
+        case 'publication_id': return 'test-pub'
+        case 'file_path': return 'test-dir'
+        case 'recursive': return 'false'
+        default: return ''
+      }
+    })
+
+    vi.mocked(fs.existsSync).mockReturnValue(true)
+    vi.mocked(fs.statSync).mockReturnValue({ isFile: () => false, isDirectory: () => true } as Stats)
+
+    await runAction()
+
+    expect(core.setFailed).toHaveBeenCalledWith('Path is a directory but recursive mode is not enabled: test-dir')
+    expect(publishToHashnode).not.toHaveBeenCalled()
+  })
+
+  it('should process multiple files in a directory when recursive is enabled', async () => {
+    const mockContent = 'test content'
+    const mockValidation = { isValid: true, errors: [] }
+    const mockMetadata = {
+      title: 'Test Article',
+      content: 'test content',
+      tags: ['test'],
+      articleId: undefined,
+      draftId: undefined,
+    }
+    const mockPublishResponse = {
+      articleId: 'article-id-123',
+      title: 'Test Article'
+    }
+
+    vi.mocked(core.getInput).mockImplementation((name) => {
+      switch (name) {
+        case 'token': return 'test-token'
+        case 'publication_id': return 'test-pub'
+        case 'file_path': return 'test-dir'
+        case 'recursive': return 'true'
+        case 'is_draft': return 'false'
+        default: return ''
+      }
+    })
+
+    vi.mocked(fs.existsSync).mockReturnValue(true)
+    vi.mocked(fs.statSync).mockImplementation((path) => {
+      if (path === 'test-dir') {
+        return { isFile: () => false, isDirectory: () => true } as Stats
+      }
+      if (path === 'test-dir/file1.md' || path === 'test-dir/file2.md') {
+        return { isFile: () => true, isDirectory: () => false } as Stats
+      }
+      return { isFile: () => true, isDirectory: () => false } as Stats
+    })
+    vi.mocked(fs.readdirSync).mockReturnValue(['file1.md', 'file2.md'] as unknown as fs.Dirent<Buffer>[])
+    vi.mocked(fs.readFileSync).mockReturnValue(mockContent)
+    vi.mocked(validateMarkdown).mockReturnValue(mockValidation)
+    vi.mocked(parseMarkdown).mockReturnValue(mockMetadata)
+    vi.mocked(publishToHashnode).mockResolvedValue(mockPublishResponse)
+
+    await runAction()
+
+    expect(core.info).toHaveBeenCalledWith('Found 2 markdown files to process')
+    expect(publishToHashnode).toHaveBeenCalledTimes(2)
   })
 })
