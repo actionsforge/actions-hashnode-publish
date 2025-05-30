@@ -1,5 +1,9 @@
 # Hashnode Publisher
 
+[![ci](https://github.com/actionsforge/actions-hashnode-publish/actions/workflows/ci.yml/badge.svg)](https://github.com/actionsforge/actions-hashnode-publish/actions/workflows/ci.yml)
+
+[![Build, Commit, Tag & Release](https://github.com/actionsforge/actions-hashnode-publish/actions/workflows/build-and-tag.yml/badge.svg)](https://github.com/actionsforge/actions-hashnode-publish/actions/workflows/build-and-tag.yml)
+
 A GitHub Action and CLI tool to publish markdown articles to Hashnode from a GitHub repository using GraphQL API.
 
 ## Features
