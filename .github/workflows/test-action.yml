@@ -1,0 +1,125 @@
+name: Test Hashnode Publisher Validation
+
+on:
+  workflow_dispatch:
+    inputs:
+      test-mode:
+        description: 'Test mode (basic|full)'
+        required: false
+        default: 'basic'
+        type: choice
+        options:
+          - basic
+          - full
+      recursive:
+        description: 'Process directories recursively'
+        required: false
+        type: boolean
+        default: false
+      continue-on-error:
+        description: 'Continue even if validation fails'
+        required: false
+        type: boolean
+        default: false
+  pull_request:
+    paths:
+      - 'src/**'
+      - 'action.yml'
+      - '.github/workflows/**'
+  push:
+    branches:
+      - main
+    paths:
+      - 'src/**'
+      - 'action.yml'
+      - '.github/workflows/**'
+
+jobs:
+  test-validation:
+    name: Test Validation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build action
+        run: |
+          npm run build
+          echo "Checking build output..."
+          ls -la dist/
+
+          # Check for bundled output
+          if [ ! -f "dist/index.js" ]; then
+            echo "❌ Missing bundled output: dist/index.js"
+            exit 1
+          fi
+          echo "✅ Found bundled output: dist/index.js"
+
+      - name: Create basic test content
+        if: inputs.test-mode == 'basic' || github.event_name == 'pull_request' || github.event_name == 'push'
+        run: |
+          mkdir -p test-content
+          cat > test-content/hello-world.md <<EOL
+          ---
+          title: "Hello World"
+          tags: ["test", "hello"]
+          ---
+
+          This is a test article for the Hashnode Publisher action.
+          EOL
+
+      - name: Create full test content
+        if: inputs.test-mode == 'full'
+        run: |
+          mkdir -p test-content/subdir
+          # Create multiple test files
+          cat > test-content/hello-world.md <<EOL
+          ---
+          title: "Hello World"
+          tags: ["test", "hello"]
+          ---
+
+          This is a test article for the Hashnode Publisher action.
+          EOL
+
+          cat > test-content/subdir/another-article.md <<EOL
+          ---
+          title: "Another Article"
+          tags: ["test", "article"]
+          ---
+
+          This is another test article in a subdirectory.
+          EOL
+
+          # Create an invalid file to test error handling
+          cat > test-content/invalid.md <<EOL
+          ---
+          title: "Invalid Article"
+          tags: ["toolongtagtoolongtagtoolong"]
+          ---
+
+          Too short.
+          EOL
+
+      - name: Test validation
+        uses: ./
+        with:
+          command: validate
+          file_path: test-content/
+          recursive: ${{ inputs.recursive || github.event_name == 'pull_request' || github.event_name == 'push' }}
+          continue_on_error: ${{ inputs.continue-on-error }}
+
+      - name: Verify test results
+        run: |
+          echo "✅ Validation test completed"
+          echo "Test mode: ${{ inputs.test-mode || 'auto' }}"
+          echo "Recursive: ${{ inputs.recursive || github.event_name == 'pull_request' || github.event_name == 'push' }}"
+          echo "Continue on error: ${{ inputs.continue-on-error }}"

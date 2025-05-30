@@ -1,5 +1,7 @@
 # Hashnode Publisher
 
+[![test](https://github.com/actionsforge/actions-hashnode-publish/actions/workflows/test-action.yml/badge.svg)](https://github.com/actionsforge/actions-hashnode-publish/actions/workflows/test-action.yml)
+
 [![ci](https://github.com/actionsforge/actions-hashnode-publish/actions/workflows/ci.yml/badge.svg)](https://github.com/actionsforge/actions-hashnode-publish/actions/workflows/ci.yml)
 
 [![Build, Commit, Tag & Release](https://github.com/actionsforge/actions-hashnode-publish/actions/workflows/build-and-tag.yml/badge.svg)](https://github.com/actionsforge/actions-hashnode-publish/actions/workflows/build-and-tag.yml)
@@ -14,6 +16,7 @@ A GitHub Action and CLI tool to publish markdown articles to Hashnode from a Git
 - GitHub Action integration
 - CLI tool for local usage
 - Prevents duplicate submissions with status tracking
+- Recursive directory processing for batch publishing
 
 ## Markdown Format
 
@@ -50,17 +53,29 @@ The `articleId` and `draftId` fields are used to update existing articles or dra
 The tool can be used as a CLI tool by running `node dist/index.js` with the following commands:
 
 ```bash
-# Validate a markdown file
-node dist/index.js validate blog.md
+# Validate a single markdown file
+node dist/index.js validate blog/hello-world.md
+
+# Validate all markdown files in a folder (non-recursive)
+node dist/index.js validate blog/
+
+# Validate all markdown files in a folder recursively
+node dist/index.js validate blog/ --recursive
+
+# Validate and continue even if there are errors
+node dist/index.js validate blog/ --continue-on-error
+
+# Validate recursively and continue on error
+node dist/index.js validate blog/ --recursive --continue-on-error
 
 # Create a draft
-node dist/index.js draft blog.md --token YOUR_TOKEN --publication-id YOUR_PUB_ID
+node dist/index.js draft blog/hello-world.md --token YOUR_TOKEN --publication-id YOUR_PUB_ID
 
 # Publish an article
-node dist/index.js publish blog.md --token YOUR_TOKEN --publication-id YOUR_PUB_ID
+node dist/index.js publish blog/hello-world.md --token YOUR_TOKEN --publication-id YOUR_PUB_ID
 
 # Dry run (validate without publishing)
-node dist/index.js draft blog.md --token YOUR_TOKEN --publication-id YOUR_PUB_ID --dry-run
+node dist/index.js draft blog/hello-world.md --token YOUR_TOKEN --publication-id YOUR_PUB_ID --dry-run
 ```
 
 You can also set your Hashnode token and publication ID as environment variables:
@@ -73,9 +88,11 @@ export PUBLICATION_ID=your_publication_id
 Then you can run the commands without specifying them:
 
 ```bash
-node dist/index.js validate blog.md
-node dist/index.js draft blog.md
-node dist/index.js publish blog.md
+node dist/index.js validate blog/hello-world.md
+node dist/index.js validate blog/
+node dist/index.js validate blog/ --continue-on-error
+node dist/index.js draft blog/hello-world.md
+node dist/index.js publish blog/hello-world.md
 ```
 
 ## GitHub Action Usage
@@ -90,7 +107,19 @@ on:
       - 'blog/**/*.md'
 
 jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions-hashnode-publish@v1
+        with:
+          command: validate
+          file_path: blog/
+          recursive: true  # Process all markdown files in subdirectories
+          continue_on_error: true  # Continue even if some files have validation errors
+
   publish:
+    needs: validate
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -98,18 +127,22 @@ jobs:
         with:
           token: ${{ secrets.HASHNODE_TOKEN }}
           publication_id: ${{ secrets.HASHNODE_PUBLICATION_ID }}
-          file_path: blog/my-article.md
+          file_path: blog/hello-world.md  # Can be a single file or directory
           is_draft: false
+          recursive: true  # Process all markdown files in subdirectories
 ```
 
 ### Inputs
 
-| Name | Description | Required |
-|------|-------------|----------|
-| `token` | Hashnode API token | Yes |
-| `publication_id` | Hashnode publication ID | Yes |
-| `file_path` | Path to the markdown file to publish | Yes |
-| `is_draft` | Whether to create a draft or publish directly (default: false) | No |
+| Name | Description | Required | Default |
+|------|-------------|----------|---------|
+| `command` | Command to run (validate, draft, publish) | Yes | - |
+| `token` | Hashnode API token | Yes (for draft/publish) | - |
+| `publication_id` | Hashnode publication ID | Yes (for draft/publish) | - |
+| `file_path` | Path to the markdown file or directory to process | Yes | - |
+| `is_draft` | Whether to create a draft or publish directly | No | false |
+| `recursive` | Process all markdown files in subdirectories | No | false |
+| `continue_on_error` | Continue even if validation fails | No | false |
 
 ### Outputs
 
@@ -133,4 +166,4 @@ npm run build
 
 ## License
 
-MIT
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
