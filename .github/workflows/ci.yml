@@ -1,0 +1,48 @@
+name: ci
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: dummy-token
+      GITHUB_REPOSITORY: example-org/example-repo
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type check
+        run: npm run build
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Security audit
+        run: npm audit || true
+
+      - name: Run unit tests
+        run: npm test
+
+      - name: Test coverage
+        run: npm test -- --coverage
+
+      - name: Verify build
+        run: |
+          npm run build
+          test -f dist/sync-teams.js
+
+      - name: Check dependencies
+        run: npm outdated || true

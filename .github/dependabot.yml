@@ -1,0 +1,50 @@
+# Dependabot configuration file
+version: 2
+updates:
+  # Enable version updates for npm
+  - package-ecosystem: "npm"
+    # Look for `package.json` and `lock` files in the `root` directory
+    directory: "/"
+    # Check for updates once a week
+    schedule:
+      interval: "weekly"
+    # Group all minor and patch updates together
+    groups:
+      dependencies:
+        patterns:
+          - "*"
+    # Set version update strategy
+    versioning-strategy:
+      increase: "semver"
+    # Limit PRs to 5 open at a time
+    open-pull-requests-limit: 5
+    # Add reviewers
+    reviewers:
+      - "johna1203"
+    # Labels on pull requests for version updates
+    labels:
+      - "dependencies"
+      - "npm"
+    # Allow up to 10 open pull requests for dependencies
+    open-pull-requests-limit: 10
+    # Specify version constraints and updates
+    ignore:
+      # Lock major versions for core dependencies
+      - dependency-name: "@octokit/rest"
+        versions: [">=21.0.0"]
+      - dependency-name: "@typescript-eslint/*"
+        versions: [">=7.0.0"]
+      - dependency-name: "eslint"
+        versions: [">=9.0.0"]
+
+  # Enable version updates for GitHub Actions
+  - package-ecosystem: "github-actions"
+    # Look for `.github/workflows` files in the `root` directory
+    directory: "/"
+    # Check for updates once a week
+    schedule:
+      interval: "weekly"
+    # Add labels on pull requests for version updates
+    labels:
+      - "dependencies"
+      - "github-actions"
