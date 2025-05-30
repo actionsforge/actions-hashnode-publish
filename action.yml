@@ -1,0 +1,30 @@
+name: "Hashnode Publish"
+description: "Publish markdown articles to Hashnode from your GitHub repository"
+inputs:
+  token:
+    description: "Hashnode API token"
+    required: true
+  publication_id:
+    description: "Your Hashnode publication ID"
+    required: true
+  file_path:
+    description: "Path to the markdown file to publish"
+    required: true
+  is_draft:
+    description: "Create as draft instead of publishing immediately"
+    required: false
+    default: "false"
+  dry_run:
+    description: "Validate the markdown file without publishing"
+    required: false
+    default: "false"
+outputs:
+  draft_id:
+    description: "The ID of the created draft (only set when creating a draft)"
+  article_id:
+    description: "The ID of the published article (only set when publishing)"
+  title:
+    description: "The title of the created draft or published post"
+runs:
+  using: "node20"
+  main: "dist/index.js"
