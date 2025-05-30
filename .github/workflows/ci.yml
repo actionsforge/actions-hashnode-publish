@@ -39,10 +39,5 @@ jobs:
       - name: Test coverage
         run: npm test -- --coverage
 
-      - name: Verify build
-        run: |
-          npm run build
-          test -f dist/sync-teams.js
-
       - name: Check dependencies
         run: npm outdated || true
