@@ -1,4 +1,4 @@
-name: "Hashnode Publish"
+name: "Hashnode Publish Sync"
 description: "Publish markdown articles to Hashnode from your GitHub repository"
 inputs:
   token:
