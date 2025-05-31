@@ -2,25 +2,7 @@ name: Test Hashnode Publisher Validation
 
 on:
   workflow_dispatch:
-    inputs:
-      test-mode:
-        description: 'Test mode (basic|full)'
-        required: false
-        default: 'basic'
-        type: choice
-        options:
-          - basic
-          - full
-      recursive:
-        description: 'Process directories recursively'
-        required: false
-        type: boolean
-        default: false
-      continue-on-error:
-        description: 'Continue even if validation fails'
-        required: false
-        type: boolean
-        default: false
+
   pull_request:
     paths:
       - 'src/**'
@@ -63,25 +45,11 @@ jobs:
           fi
           echo "✅ Found bundled output: dist/index.js"
 
-      - name: Create basic test content
-        if: inputs.test-mode == 'basic' || github.event_name == 'pull_request' || github.event_name == 'push'
+      - name: Create test content
         run: |
-          mkdir -p test-content
-          cat > test-content/hello-world.md <<EOL
-          ---
-          title: "Hello World"
-          tags: ["test", "hello"]
-          ---
-
-          This is a test article for the Hashnode Publisher action.
-          EOL
-
-      - name: Create full test content
-        if: inputs.test-mode == 'full'
-        run: |
-          mkdir -p test-content/subdir
+          mkdir -p tmp-blog/subdir
           # Create multiple test files
-          cat > test-content/hello-world.md <<EOL
+          cat > tmp-blog/hello-world.md <<EOL
           ---
           title: "Hello World"
           tags: ["test", "hello"]
@@ -90,7 +58,7 @@ jobs:
           This is a test article for the Hashnode Publisher action.
           EOL
 
-          cat > test-content/subdir/another-article.md <<EOL
+          cat > tmp-blog/subdir/another-article.md <<EOL
           ---
           title: "Another Article"
           tags: ["test", "article"]
@@ -100,7 +68,7 @@ jobs:
           EOL
 
           # Create an invalid file to test error handling
-          cat > test-content/invalid.md <<EOL
+          cat > tmp-blog/invalid.md <<EOL
           ---
           title: "Invalid Article"
           tags: ["toolongtagtoolongtagtoolong"]
@@ -109,17 +77,29 @@ jobs:
           Too short.
           EOL
 
-      - name: Test validation
-        uses: ./
-        with:
-          command: validate
-          file_path: test-content/
-          recursive: ${{ inputs.recursive || github.event_name == 'pull_request' || github.event_name == 'push' }}
-          continue_on_error: ${{ inputs.continue-on-error }}
+      - name: Run validation
+        id: validate
+        run: |
+          set +e
+          OUTPUT=$(node dist/index.js validate tmp-blog/ --recursive --continue-on-error)
+          STATUS=$?
+          echo "$OUTPUT"
+          echo "exit_code=$STATUS" >> $GITHUB_OUTPUT
+          echo "output<<EOF" >> $GITHUB_OUTPUT
+          echo "$OUTPUT" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+          exit $STATUS
 
       - name: Verify test results
         run: |
           echo "✅ Validation test completed"
-          echo "Test mode: ${{ inputs.test-mode || 'auto' }}"
-          echo "Recursive: ${{ inputs.recursive || github.event_name == 'pull_request' || github.event_name == 'push' }}"
-          echo "Continue on error: ${{ inputs.continue-on-error }}"
+          echo "Test directory: tmp-blog/"
+          echo "Mode: Recursive validation with continue-on-error"
+          echo "Test files:"
+          find tmp-blog -type f -name "*.md" -exec echo "  - {}" \;
+
+          if echo "${{ steps.validate.outputs.output }}" | grep -q '❌'; then
+            echo "Detected validation errors as expected."
+          else
+            echo "No validation errors detected."
+          fi
