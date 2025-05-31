@@ -113,7 +113,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions-hashnode-publish@v1
+      - uses: actionsforge/actions-hashnode-publish@v1
         with:
           command: validate  # Required: validate, draft, or publish
           file_path: blog/
@@ -125,7 +125,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions-hashnode-publish@v1
+      - uses: actionsforge/actions-hashnode-publish@v1
         with:
           command: publish  # Required
           token: ${{ secrets.HASHNODE_TOKEN }}
