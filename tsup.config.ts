@@ -15,7 +15,11 @@ export default defineConfig({
     '@actions/github',
     '@actions/io',
     '@octokit/rest',
-    'js-yaml'
+    'axios',
+    'fs',
+    'gray-matter',
+    'js-yaml',
+    'path'
   ],
   splitting: false
 });
