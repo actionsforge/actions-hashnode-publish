@@ -23566,7 +23566,6 @@ async function runAction() {
       let hasErrors = false;
       for (const file of markdownFiles) {
         const fileContent = fs.readFileSync(file, "utf8");
-        const metadata = parseMarkdown(fileContent);
         if (command === "validate") {
           const result = validateMarkdown(fileContent);
           if (result.isValid) {
@@ -23615,7 +23614,6 @@ async function runAction() {
         return;
       }
       const fileContent = fs.readFileSync(filePath, "utf8");
-      const metadata = parseMarkdown(fileContent);
       if (command === "validate") {
         const result = validateMarkdown(fileContent);
         if (result.isValid) {
