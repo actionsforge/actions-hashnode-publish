@@ -13,8 +13,9 @@ export default defineConfig({
   noExternal: [
     '@actions/core',
     '@actions/github',
-    'js-yaml',
-    '@octokit/rest'
+    '@actions/io',
+    '@octokit/rest',
+    'js-yaml'
   ],
   splitting: false
 });
