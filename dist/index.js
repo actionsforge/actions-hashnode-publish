@@ -423,18 +423,18 @@ var require_tunnel = __commonJS({
             res.statusCode
           );
           socket.destroy();
-          var error = new Error("tunneling socket could not be established, statusCode=" + res.statusCode);
-          error.code = "ECONNRESET";
-          options2.request.emit("error", error);
+          var error2 = new Error("tunneling socket could not be established, statusCode=" + res.statusCode);
+          error2.code = "ECONNRESET";
+          options2.request.emit("error", error2);
           self.removeSocket(placeholder);
           return;
         }
         if (head.length > 0) {
           debug("got illegal response body from proxy");
           socket.destroy();
-          var error = new Error("got illegal response body from proxy");
-          error.code = "ECONNRESET";
-          options2.request.emit("error", error);
+          var error2 = new Error("got illegal response body from proxy");
+          error2.code = "ECONNRESET";
+          options2.request.emit("error", error2);
           self.removeSocket(placeholder);
           return;
         }
@@ -449,9 +449,9 @@ var require_tunnel = __commonJS({
           cause.message,
           cause.stack
         );
-        var error = new Error("tunneling socket could not be established, cause=" + cause.message);
-        error.code = "ECONNRESET";
-        options2.request.emit("error", error);
+        var error2 = new Error("tunneling socket could not be established, cause=" + cause.message);
+        error2.code = "ECONNRESET";
+        options2.request.emit("error", error2);
         self.removeSocket(placeholder);
       }
     };
@@ -5582,7 +5582,7 @@ Content-Type: ${value.type || "application/octet-stream"}\r
         throw new TypeError("Body is unusable");
       }
       const promise = createDeferredPromise();
-      const errorSteps = (error) => promise.reject(error);
+      const errorSteps = (error2) => promise.reject(error2);
       const successSteps = (data) => {
         try {
           promise.resolve(convertBytesToJSValue(data));
@@ -5868,16 +5868,16 @@ var require_request = __commonJS({
           this.onError(err);
         }
       }
-      onError(error) {
+      onError(error2) {
         this.onFinally();
         if (channels.error.hasSubscribers) {
-          channels.error.publish({ request: this, error });
+          channels.error.publish({ request: this, error: error2 });
         }
         if (this.aborted) {
           return;
         }
         this.aborted = true;
-        return this[kHandler].onError(error);
+        return this[kHandler].onError(error2);
       }
       onFinally() {
         if (this.errorHandler) {
@@ -6740,8 +6740,8 @@ var require_RedirectHandler = __commonJS({
       onUpgrade(statusCode, headers, socket) {
         this.handler.onUpgrade(statusCode, headers, socket);
       }
-      onError(error) {
-        this.handler.onError(error);
+      onError(error2) {
+        this.handler.onError(error2);
       }
       onHeaders(statusCode, headers, resume, statusText) {
         this.location = this.history.length >= this.maxRedirections || util.isDisturbed(this.opts.body) ? null : parseLocation(statusCode, headers);
@@ -8885,7 +8885,7 @@ var require_pool = __commonJS({
         this[kOptions] = { ...util.deepClone(options2), connect, allowH2 };
         this[kOptions].interceptors = options2.interceptors ? { ...options2.interceptors } : void 0;
         this[kFactory] = factory;
-        this.on("connectionError", (origin2, targets, error) => {
+        this.on("connectionError", (origin2, targets, error2) => {
           for (const target of targets) {
             const idx = this[kClients].indexOf(target);
             if (idx !== -1) {
@@ -10496,13 +10496,13 @@ var require_mock_utils = __commonJS({
       if (mockDispatch2.data.callback) {
         mockDispatch2.data = { ...mockDispatch2.data, ...mockDispatch2.data.callback(opts) };
       }
-      const { data: { statusCode, data, headers, trailers, error }, delay, persist } = mockDispatch2;
+      const { data: { statusCode, data, headers, trailers, error: error2 }, delay, persist } = mockDispatch2;
       const { timesInvoked, times } = mockDispatch2;
       mockDispatch2.consumed = !persist && timesInvoked >= times;
       mockDispatch2.pending = timesInvoked < times;
-      if (error !== null) {
+      if (error2 !== null) {
         deleteMockDispatch(this[kDispatches], key);
-        handler.onError(error);
+        handler.onError(error2);
         return true;
       }
       if (typeof delay === "number" && delay > 0) {
@@ -10540,19 +10540,19 @@ var require_mock_utils = __commonJS({
         if (agent.isMockActive) {
           try {
             mockDispatch.call(this, opts, handler);
-          } catch (error) {
-            if (error instanceof MockNotMatchedError) {
+          } catch (error2) {
+            if (error2 instanceof MockNotMatchedError) {
               const netConnect = agent[kGetNetConnect]();
               if (netConnect === false) {
-                throw new MockNotMatchedError(`${error.message}: subsequent request to origin ${origin} was not allowed (net.connect disabled)`);
+                throw new MockNotMatchedError(`${error2.message}: subsequent request to origin ${origin} was not allowed (net.connect disabled)`);
               }
               if (checkNetConnect(netConnect, origin)) {
                 originalDispatch.call(this, opts, handler);
               } else {
-                throw new MockNotMatchedError(`${error.message}: subsequent request to origin ${origin} was not allowed (net.connect is not enabled for this origin)`);
+                throw new MockNotMatchedError(`${error2.message}: subsequent request to origin ${origin} was not allowed (net.connect is not enabled for this origin)`);
               }
             } else {
-              throw error;
+              throw error2;
             }
           }
         } else {
@@ -10715,11 +10715,11 @@ var require_mock_interceptor = __commonJS({
       /**
        * Mock an undici request with a defined error.
        */
-      replyWithError(error) {
-        if (typeof error === "undefined") {
+      replyWithError(error2) {
+        if (typeof error2 === "undefined") {
           throw new InvalidArgumentError("error must be defined");
         }
-        const newMockDispatch = addMockDispatch(this[kDispatches], this[kDispatchKey], { error });
+        const newMockDispatch = addMockDispatch(this[kDispatches], this[kDispatchKey], { error: error2 });
         return new MockScope(newMockDispatch);
       }
       /**
@@ -13047,17 +13047,17 @@ var require_fetch = __commonJS({
         this.emit("terminated", reason);
       }
       // https://fetch.spec.whatwg.org/#fetch-controller-abort
-      abort(error) {
+      abort(error2) {
         if (this.state !== "ongoing") {
           return;
         }
         this.state = "aborted";
-        if (!error) {
-          error = new DOMException2("The operation was aborted.", "AbortError");
+        if (!error2) {
+          error2 = new DOMException2("The operation was aborted.", "AbortError");
         }
-        this.serializedAbortReason = error;
-        this.connection?.destroy(error);
-        this.emit("terminated", error);
+        this.serializedAbortReason = error2;
+        this.connection?.destroy(error2);
+        this.emit("terminated", error2);
       }
     };
     function fetch2(input, init = {}) {
@@ -13161,13 +13161,13 @@ var require_fetch = __commonJS({
         performance.markResourceTiming(timingInfo, originalURL.href, initiatorType, globalThis2, cacheState);
       }
     }
-    function abortFetch(p, request, responseObject, error) {
-      if (!error) {
-        error = new DOMException2("The operation was aborted.", "AbortError");
+    function abortFetch(p, request, responseObject, error2) {
+      if (!error2) {
+        error2 = new DOMException2("The operation was aborted.", "AbortError");
       }
-      p.reject(error);
+      p.reject(error2);
       if (request.body != null && isReadable(request.body?.stream)) {
-        request.body.stream.cancel(error).catch((err) => {
+        request.body.stream.cancel(error2).catch((err) => {
           if (err.code === "ERR_INVALID_STATE") {
             return;
           }
@@ -13179,7 +13179,7 @@ var require_fetch = __commonJS({
       }
       const response = responseObject[kState];
       if (response.body != null && isReadable(response.body?.stream)) {
-        response.body.stream.cancel(error).catch((err) => {
+        response.body.stream.cancel(error2).catch((err) => {
           if (err.code === "ERR_INVALID_STATE") {
             return;
           }
@@ -13959,13 +13959,13 @@ var require_fetch = __commonJS({
               fetchParams.controller.ended = true;
               this.body.push(null);
             },
-            onError(error) {
+            onError(error2) {
               if (this.abort) {
                 fetchParams.controller.off("terminated", this.abort);
               }
-              this.body?.destroy(error);
-              fetchParams.controller.terminate(error);
-              reject(error);
+              this.body?.destroy(error2);
+              fetchParams.controller.terminate(error2);
+              reject(error2);
             },
             onUpgrade(status, headersList, socket) {
               if (status !== 101) {
@@ -14431,8 +14431,8 @@ var require_util4 = __commonJS({
                   }
                   fr[kResult] = result;
                   fireAProgressEvent("load", fr);
-                } catch (error) {
-                  fr[kError] = error;
+                } catch (error2) {
+                  fr[kError] = error2;
                   fireAProgressEvent("error", fr);
                 }
                 if (fr[kState] !== "loading") {
@@ -14441,13 +14441,13 @@ var require_util4 = __commonJS({
               });
               break;
             }
-          } catch (error) {
+          } catch (error2) {
             if (fr[kAborted]) {
               return;
             }
             queueMicrotask(() => {
               fr[kState] = "done";
-              fr[kError] = error;
+              fr[kError] = error2;
               fireAProgressEvent("error", fr);
               if (fr[kState] !== "loading") {
                 fireAProgressEvent("loadend", fr);
@@ -16447,11 +16447,11 @@ var require_connection = __commonJS({
         });
       }
     }
-    function onSocketError(error) {
+    function onSocketError(error2) {
       const { ws } = this;
       ws[kReadyState] = states.CLOSING;
       if (channels.socketError.hasSubscribers) {
-        channels.socketError.publish(error);
+        channels.socketError.publish(error2);
       }
       this.destroy();
     }
@@ -18083,12 +18083,12 @@ var require_oidc_utils = __commonJS({
         var _a;
         return __awaiter(this, void 0, void 0, function* () {
           const httpclient = _OidcClient.createHttpClient();
-          const res = yield httpclient.getJson(id_token_url).catch((error) => {
+          const res = yield httpclient.getJson(id_token_url).catch((error2) => {
             throw new Error(`Failed to get ID Token. 
  
-        Error Code : ${error.statusCode}
+        Error Code : ${error2.statusCode}
  
-        Error Message: ${error.message}`);
+        Error Message: ${error2.message}`);
           });
           const id_token = (_a = res.result) === null || _a === void 0 ? void 0 : _a.value;
           if (!id_token) {
@@ -18109,8 +18109,8 @@ var require_oidc_utils = __commonJS({
             const id_token = yield _OidcClient.getCall(id_token_url);
             (0, core_1.setSecret)(id_token);
             return id_token;
-          } catch (error) {
-            throw new Error(`Error message: ${error.message}`);
+          } catch (error2) {
+            throw new Error(`Error message: ${error2.message}`);
           }
         });
       }
@@ -19232,7 +19232,7 @@ var require_toolrunner = __commonJS({
               this._debug(`STDIO streams have closed for tool '${this.toolPath}'`);
               state.CheckComplete();
             });
-            state.on("done", (error, exitCode) => {
+            state.on("done", (error2, exitCode) => {
               if (stdbuffer.length > 0) {
                 this.emit("stdline", stdbuffer);
               }
@@ -19240,8 +19240,8 @@ var require_toolrunner = __commonJS({
                 this.emit("errline", errbuffer);
               }
               cp.removeAllListeners();
-              if (error) {
-                reject(error);
+              if (error2) {
+                reject(error2);
               } else {
                 resolve(exitCode);
               }
@@ -19336,14 +19336,14 @@ var require_toolrunner = __commonJS({
         this.emit("debug", message);
       }
       _setResult() {
-        let error;
+        let error2;
         if (this.processExited) {
           if (this.processError) {
-            error = new Error(`There was an error when attempting to execute the process '${this.toolPath}'. This may indicate the process failed to start. Error: ${this.processError}`);
+            error2 = new Error(`There was an error when attempting to execute the process '${this.toolPath}'. This may indicate the process failed to start. Error: ${this.processError}`);
           } else if (this.processExitCode !== 0 && !this.options.ignoreReturnCode) {
-            error = new Error(`The process '${this.toolPath}' failed with exit code ${this.processExitCode}`);
+            error2 = new Error(`The process '${this.toolPath}' failed with exit code ${this.processExitCode}`);
           } else if (this.processStderr && this.options.failOnStdErr) {
-            error = new Error(`The process '${this.toolPath}' failed because one or more lines were written to the STDERR stream`);
+            error2 = new Error(`The process '${this.toolPath}' failed because one or more lines were written to the STDERR stream`);
           }
         }
         if (this.timeout) {
@@ -19351,7 +19351,7 @@ var require_toolrunner = __commonJS({
           this.timeout = null;
         }
         this.done = true;
-        this.emit("done", error, this.processExitCode);
+        this.emit("done", error2, this.processExitCode);
       }
       static HandleTimeout(state) {
         if (state.done) {
@@ -19734,7 +19734,7 @@ Support boolean input list: \`true | True | TRUE | false | False | FALSE\``);
     exports2.setCommandEcho = setCommandEcho;
     function setFailed2(message) {
       process.exitCode = ExitCode.Failure;
-      error(message);
+      error2(message);
     }
     exports2.setFailed = setFailed2;
     function isDebug() {
@@ -19745,10 +19745,10 @@ Support boolean input list: \`true | True | TRUE | false | False | FALSE\``);
       (0, command_1.issueCommand)("debug", {}, message);
     }
     exports2.debug = debug;
-    function error(message, properties = {}) {
+    function error2(message, properties = {}) {
       (0, command_1.issueCommand)("error", (0, utils_1.toCommandProperties)(properties), message instanceof Error ? message.toString() : message);
     }
-    exports2.error = error;
+    exports2.error = error2;
     function warning(message, properties = {}) {
       (0, command_1.issueCommand)("warning", (0, utils_1.toCommandProperties)(properties), message instanceof Error ? message.toString() : message);
     }
@@ -23513,8 +23513,8 @@ ${validationResult.errors.join("\n")}`);
           isDraft: shouldCreateDraft,
           existingDraftId
         });
-      } catch (error) {
-        core.setFailed(`Error processing ${filePath}: ${error instanceof Error ? error.message : "API Error"}`);
+      } catch (error2) {
+        core.setFailed(`Error processing ${filePath}: ${error2 instanceof Error ? error2.message : "API Error"}`);
         return;
       }
     }
@@ -23533,17 +23533,20 @@ ${validationResult.errors.join("\n")}`);
     }
     const newContent = import_gray_matter2.default.stringify(fileContent, newFrontmatter);
     fs.writeFileSync(filePath, newContent);
-  } catch (error) {
-    core.setFailed(`Error processing ${filePath}: ${error instanceof Error ? error.message : "Unknown error"}`);
+  } catch (error2) {
+    core.setFailed(`Error processing ${filePath}: ${error2 instanceof Error ? error2.message : "Unknown error"}`);
   }
 }
 async function runAction() {
   try {
-    const token = core.getInput("token", { required: true });
-    const publicationId = core.getInput("publication_id", { required: true });
+    const command = core.getInput("command", { required: true });
+    const token = core.getInput("token");
+    const publicationId = core.getInput("publication_id");
     const filePath = core.getInput("file_path", { required: true });
     const isDraftInput = core.getInput("is_draft") === "true";
     const recursive = core.getInput("recursive") === "true";
+    const dryRun = core.getInput("dry_run") === "true";
+    const continueOnError = core.getInput("continue_on_error") === "true";
     if (!fs.existsSync(filePath)) {
       core.setFailed(`Path does not exist: ${filePath}`);
       return;
@@ -23560,20 +23563,101 @@ async function runAction() {
         return;
       }
       core.info(`Found ${markdownFiles.length} markdown files to process`);
+      let hasErrors = false;
       for (const file of markdownFiles) {
-        await processMarkdownFile(file, token, publicationId, isDraftInput);
+        const fileContent = fs.readFileSync(file, "utf8");
+        const metadata = parseMarkdown(fileContent);
+        if (command === "validate") {
+          const result = validateMarkdown(fileContent);
+          if (result.isValid) {
+            core.info(`\u2705 ${file} is valid`);
+          } else {
+            hasErrors = true;
+            core.error(`\u274C Validation errors in ${file}:`);
+            result.errors.forEach((error2) => {
+              core.error(`  - ${error2}`);
+            });
+          }
+        } else if (command === "draft" || command === "publish") {
+          if (!token || !publicationId) {
+            core.setFailed("Token and publication_id are required for publishing");
+            return;
+          }
+          const validationResult = validateMarkdown(fileContent);
+          if (!validationResult.isValid) {
+            core.error(`\u274C Validation errors in ${file}:`);
+            validationResult.errors.forEach((error2) => {
+              core.error(`  - ${error2}`);
+            });
+            if (!continueOnError) {
+              core.setFailed("Validation failed");
+              return;
+            }
+            hasErrors = true;
+            continue;
+          }
+          if (dryRun) {
+            core.info(`\u2705 ${file} is valid`);
+            continue;
+          }
+          await processMarkdownFile(file, token, publicationId, isDraftInput);
+        } else {
+          core.setFailed(`Unknown command: ${command}`);
+          return;
+        }
+      }
+      if (hasErrors && !continueOnError) {
+        core.setFailed("Validation failed for one or more files");
       }
     } else if (stats.isFile()) {
       if (!filePath.endsWith(".md")) {
         core.setFailed(`File is not a markdown file: ${filePath}`);
         return;
       }
-      await processMarkdownFile(filePath, token, publicationId, isDraftInput);
+      const fileContent = fs.readFileSync(filePath, "utf8");
+      const metadata = parseMarkdown(fileContent);
+      if (command === "validate") {
+        const result = validateMarkdown(fileContent);
+        if (result.isValid) {
+          core.info("\u2705 Markdown file is valid");
+        } else {
+          core.error("\u274C Validation errors:");
+          result.errors.forEach((error2) => {
+            core.error(`  - ${error2}`);
+          });
+          if (!continueOnError) {
+            core.setFailed("Validation failed");
+          }
+        }
+      } else if (command === "draft" || command === "publish") {
+        if (!token || !publicationId) {
+          core.setFailed("Token and publication_id are required for publishing");
+          return;
+        }
+        const validationResult = validateMarkdown(fileContent);
+        if (!validationResult.isValid) {
+          core.error("\u274C Validation errors:");
+          validationResult.errors.forEach((error2) => {
+            core.error(`  - ${error2}`);
+          });
+          if (!continueOnError) {
+            core.setFailed("Validation failed");
+            return;
+          }
+        }
+        if (dryRun) {
+          core.info("\u2705 Markdown file is valid");
+          return;
+        }
+        await processMarkdownFile(filePath, token, publicationId, isDraftInput);
+      } else {
+        core.setFailed(`Unknown command: ${command}`);
+      }
     } else {
       core.setFailed(`Path is neither a file nor a directory: ${filePath}`);
     }
-  } catch (error) {
-    core.setFailed(error instanceof Error ? error.message : "Unknown error");
+  } catch (error2) {
+    core.setFailed(error2 instanceof Error ? error2.message : "Unknown error");
   }
 }
 async function runCli(args = process.argv.slice(2)) {
@@ -23635,8 +23719,8 @@ Examples:
           } else {
             hasErrors = true;
             console.error(`\u274C Validation errors in ${file}:`);
-            result.errors.forEach((error) => {
-              console.error(`  - ${error}`);
+            result.errors.forEach((error2) => {
+              console.error(`  - ${error2}`);
             });
           }
         }
@@ -23651,8 +23735,8 @@ Examples:
           console.log("\u2705 Markdown file is valid");
         } else {
           console.error("\u274C Validation errors:");
-          result.errors.forEach((error) => {
-            console.error(`  - ${error}`);
+          result.errors.forEach((error2) => {
+            console.error(`  - ${error2}`);
           });
           if (!continueOnError) {
             process.exit(1);
@@ -23672,8 +23756,8 @@ Examples:
       const validationResult = validateMarkdown(fileContent);
       if (!validationResult.isValid) {
         console.error("\u274C Validation errors:");
-        validationResult.errors.forEach((error) => {
-          console.error(`  - ${error}`);
+        validationResult.errors.forEach((error2) => {
+          console.error(`  - ${error2}`);
         });
         process.exit(1);
       }
@@ -23715,8 +23799,8 @@ Examples:
             existingDraftId
             // Pass draft ID for publishing existing draft
           });
-        } catch (error) {
-          console.error("Error:", error instanceof Error ? error.message : "Unknown API error");
+        } catch (error2) {
+          console.error("Error:", error2 instanceof Error ? error2.message : "Unknown API error");
           process.exit(1);
         }
       }
@@ -23737,8 +23821,8 @@ Examples:
       console.error(`Error: Unknown command "${command}"`);
       process.exit(1);
     }
-  } catch (error) {
-    console.error("Error:", error instanceof Error ? error.message : "Unknown error");
+  } catch (error2) {
+    console.error("Error:", error2 instanceof Error ? error2.message : "Unknown error");
     process.exit(1);
   }
 }

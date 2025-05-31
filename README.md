@@ -97,6 +97,8 @@ node dist/index.js publish blog/hello-world.md
 
 ## GitHub Action Usage
 
+> **Note:** The `command` input is now required for all modes (including validation). Set it to `validate`, `draft`, or `publish` as needed.
+
 ```yaml
 name: Publish to Hashnode
 
@@ -113,7 +115,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions-hashnode-publish@v1
         with:
-          command: validate
+          command: validate  # Required: validate, draft, or publish
           file_path: blog/
           recursive: true  # Process all markdown files in subdirectories
           continue_on_error: true  # Continue even if some files have validation errors
@@ -125,6 +127,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions-hashnode-publish@v1
         with:
+          command: publish  # Required
           token: ${{ secrets.HASHNODE_TOKEN }}
           publication_id: ${{ secrets.HASHNODE_PUBLICATION_ID }}
           file_path: blog/hello-world.md  # Can be a single file or directory
@@ -136,20 +139,26 @@ jobs:
 
 | Name | Description | Required | Default |
 |------|-------------|----------|---------|
-| `command` | Command to run (validate, draft, publish) | Yes | - |
+| `command` | Command to run (`validate`, `draft`, `publish`) | Yes | - |
 | `token` | Hashnode API token | Yes (for draft/publish) | - |
 | `publication_id` | Hashnode publication ID | Yes (for draft/publish) | - |
 | `file_path` | Path to the markdown file or directory to process | Yes | - |
 | `is_draft` | Whether to create a draft or publish directly | No | false |
 | `recursive` | Process all markdown files in subdirectories | No | false |
-| `continue_on_error` | Continue even if validation fails | No | false |
+| `continue_on_error` | Continue even if validation fails (for batch/recursive) | No | false |
 
 ### Outputs
 
 | Name | Description |
 |------|-------------|
 | `draft_id` | ID of the created draft |
+| `article_id` | ID of the published article |
 | `title` | Title of the published article |
+
+### Validation Error Messages
+
+- For single file validation, the action will fail with a generic message: `Validation failed`.
+- For recursive/batch validation, errors for each file are logged, and the action will fail with `Validation failed for one or more files` unless `continue_on_error` is set to `true`.
 
 ## Development
 

@@ -7,7 +7,8 @@ vi.mock('@actions/core', () => {
     getInput: vi.fn(),
     setFailed: vi.fn(),
     setOutput: vi.fn(),
-    info: vi.fn()
+    info: vi.fn(),
+    error: vi.fn()
   }
 })
 
@@ -42,8 +43,9 @@ describe('GitHub Action', () => {
       title: 'Test Article'
     }
 
-    vi.mocked(core.getInput).mockImplementation((name) => {
+    vi.mocked(core.getInput).mockImplementation((name: string) => {
       switch (name) {
+        case 'command': return 'publish'
         case 'token': return 'test-token'
         case 'publication_id': return 'test-pub'
         case 'file_path': return 'test.md'
@@ -91,8 +93,9 @@ describe('GitHub Action', () => {
       title: 'Test Article'
     }
 
-    vi.mocked(core.getInput).mockImplementation((name) => {
+    vi.mocked(core.getInput).mockImplementation((name: string) => {
       switch (name) {
+        case 'command': return 'publish'
         case 'token': return 'test-token'
         case 'publication_id': return 'test-pub'
         case 'file_path': return 'test.md'
@@ -140,8 +143,9 @@ describe('GitHub Action', () => {
       title: 'Test Article (Published)'
     }
 
-    vi.mocked(core.getInput).mockImplementation((name) => {
+    vi.mocked(core.getInput).mockImplementation((name: string) => {
       switch (name) {
+        case 'command': return 'publish'
         case 'token': return 'test-token'
         case 'publication_id': return 'test-pub'
         case 'file_path': return 'test.md'
@@ -185,8 +189,9 @@ describe('GitHub Action', () => {
       draftId: 'draft-id-456',
     }
 
-    vi.mocked(core.getInput).mockImplementation((name) => {
+    vi.mocked(core.getInput).mockImplementation((name: string) => {
       switch (name) {
+        case 'command': return 'publish'
         case 'token': return 'test-token'
         case 'publication_id': return 'test-pub'
         case 'file_path': return 'test.md'
@@ -220,8 +225,9 @@ describe('GitHub Action', () => {
       draftId: undefined,
     }
 
-    vi.mocked(core.getInput).mockImplementation((name) => {
+    vi.mocked(core.getInput).mockImplementation((name: string) => {
       switch (name) {
+        case 'command': return 'publish'
         case 'token': return 'test-token'
         case 'publication_id': return 'test-pub'
         case 'file_path': return 'test.md'
@@ -251,8 +257,9 @@ describe('GitHub Action', () => {
       errors: ['Error 1', 'Error 2']
     }
 
-    vi.mocked(core.getInput).mockImplementation((name) => {
+    vi.mocked(core.getInput).mockImplementation((name: string) => {
       switch (name) {
+        case 'command': return 'validate'
         case 'token': return 'test-token'
         case 'publication_id': return 'test-pub'
         case 'file_path': return 'test.md'
@@ -267,7 +274,7 @@ describe('GitHub Action', () => {
 
     await runAction()
 
-    expect(core.setFailed).toHaveBeenCalledWith('Validation failed for test.md:\nError 1\nError 2')
+    expect(core.setFailed).toHaveBeenCalledWith('Validation failed')
     expect(publishToHashnode).not.toHaveBeenCalled()
   })
 
@@ -282,8 +289,9 @@ describe('GitHub Action', () => {
       draftId: undefined,
     }
 
-    vi.mocked(core.getInput).mockImplementation((name) => {
+    vi.mocked(core.getInput).mockImplementation((name: string) => {
       switch (name) {
+        case 'command': return 'publish'
         case 'token': return 'test-token'
         case 'publication_id': return 'test-pub'
         case 'file_path': return 'test.md'
@@ -305,8 +313,9 @@ describe('GitHub Action', () => {
   })
 
   it('should fail if file does not exist', async () => {
-    vi.mocked(core.getInput).mockImplementation((name) => {
+    vi.mocked(core.getInput).mockImplementation((name: string) => {
       switch (name) {
+        case 'command': return 'publish'
         case 'token': return 'test-token'
         case 'publication_id': return 'test-pub'
         case 'file_path': return 'test.md'
@@ -323,8 +332,9 @@ describe('GitHub Action', () => {
   })
 
   it('should fail if path is a directory but recursive is not enabled', async () => {
-    vi.mocked(core.getInput).mockImplementation((name) => {
+    vi.mocked(core.getInput).mockImplementation((name: string) => {
       switch (name) {
+        case 'command': return 'publish'
         case 'token': return 'test-token'
         case 'publication_id': return 'test-pub'
         case 'file_path': return 'test-dir'
@@ -357,8 +367,9 @@ describe('GitHub Action', () => {
       title: 'Test Article'
     }
 
-    vi.mocked(core.getInput).mockImplementation((name) => {
+    vi.mocked(core.getInput).mockImplementation((name: string) => {
       switch (name) {
+        case 'command': return 'publish'
         case 'token': return 'test-token'
         case 'publication_id': return 'test-pub'
         case 'file_path': return 'test-dir'
