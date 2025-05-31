@@ -1,12 +1,15 @@
 name: "Hashnode Publish Sync"
 description: "Publish markdown articles to Hashnode from your GitHub repository"
 inputs:
+  command:
+    description: "Command to run (validate, draft, or publish)"
+    required: true
   token:
     description: "Hashnode API token"
-    required: true
+    required: false
   publication_id:
     description: "Your Hashnode publication ID"
-    required: true
+    required: false
   file_path:
     description: "Path to the markdown file or directory to publish"
     required: true
@@ -15,11 +18,15 @@ inputs:
     required: false
     default: "false"
   dry_run:
-    description: "Validate the markdown file without publishing"
+    description: "Validate without publishing"
     required: false
     default: "false"
   recursive:
     description: "If file_path is a directory, recursively process all markdown files"
+    required: false
+    default: "false"
+  continue_on_error:
+    description: "Continue even if validation fails"
     required: false
     default: "false"
 outputs:

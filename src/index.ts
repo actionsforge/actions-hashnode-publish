@@ -107,11 +107,14 @@ async function processMarkdownFile(filePath: string, token: string, publicationI
 export async function runAction(): Promise<void> {
   try {
     // Get inputs
-    const token = core.getInput('token', { required: true })
-    const publicationId = core.getInput('publication_id', { required: true })
+    const command = core.getInput('command', { required: true })
+    const token = core.getInput('token')
+    const publicationId = core.getInput('publication_id')
     const filePath = core.getInput('file_path', { required: true })
     const isDraftInput = core.getInput('is_draft') === 'true'
     const recursive = core.getInput('recursive') === 'true'
+    const dryRun = core.getInput('dry_run') === 'true'
+    const continueOnError = core.getInput('continue_on_error') === 'true'
 
     // Check if path exists
     if (!fs.existsSync(filePath)) {
@@ -133,15 +136,109 @@ export async function runAction(): Promise<void> {
         return
       }
       core.info(`Found ${markdownFiles.length} markdown files to process`)
+
+      let hasErrors = false
       for (const file of markdownFiles) {
-        await processMarkdownFile(file, token, publicationId, isDraftInput)
+        const fileContent = fs.readFileSync(file, 'utf8')
+
+        if (command === 'validate') {
+          const result = validateMarkdown(fileContent)
+          if (result.isValid) {
+            core.info(`✅ ${file} is valid`)
+          } else {
+            hasErrors = true
+            core.error(`❌ Validation errors in ${file}:`)
+            result.errors.forEach(error => {
+              core.error(`  - ${error}`)
+            })
+          }
+        } else if (command === 'draft' || command === 'publish') {
+          if (!token || !publicationId) {
+            core.setFailed('Token and publication_id are required for publishing')
+            return
+          }
+
+          // Validate markdown
+          const validationResult = validateMarkdown(fileContent)
+          if (!validationResult.isValid) {
+            core.error(`❌ Validation errors in ${file}:`)
+            validationResult.errors.forEach(error => {
+              core.error(`  - ${error}`)
+            })
+            if (!continueOnError) {
+              core.setFailed('Validation failed')
+              return
+            }
+            hasErrors = true
+            continue
+          }
+
+          if (dryRun) {
+            core.info(`✅ ${file} is valid`)
+            continue
+          }
+
+          // Publishing mode
+          await processMarkdownFile(file, token, publicationId, isDraftInput)
+        } else {
+          core.setFailed(`Unknown command: ${command}`)
+          return
+        }
+      }
+
+      if (hasErrors && !continueOnError) {
+        core.setFailed('Validation failed for one or more files')
       }
     } else if (stats.isFile()) {
       if (!filePath.endsWith('.md')) {
         core.setFailed(`File is not a markdown file: ${filePath}`)
         return
       }
-      await processMarkdownFile(filePath, token, publicationId, isDraftInput)
+
+      const fileContent = fs.readFileSync(filePath, 'utf8')
+
+      if (command === 'validate') {
+        const result = validateMarkdown(fileContent)
+        if (result.isValid) {
+          core.info('✅ Markdown file is valid')
+        } else {
+          core.error('❌ Validation errors:')
+          result.errors.forEach(error => {
+            core.error(`  - ${error}`)
+          })
+          if (!continueOnError) {
+            core.setFailed('Validation failed')
+          }
+        }
+      } else if (command === 'draft' || command === 'publish') {
+        if (!token || !publicationId) {
+          core.setFailed('Token and publication_id are required for publishing')
+          return
+        }
+
+        // Validate markdown
+        const validationResult = validateMarkdown(fileContent)
+        if (!validationResult.isValid) {
+          core.error('❌ Validation errors:')
+          validationResult.errors.forEach(error => {
+            core.error(`  - ${error}`)
+          })
+          if (!continueOnError) {
+            core.setFailed('Validation failed')
+            return
+          }
+        }
+
+        if (dryRun) {
+          core.info('✅ Markdown file is valid')
+          return
+        }
+
+        // Publishing mode
+        await processMarkdownFile(filePath, token, publicationId, isDraftInput)
+      } else {
+        core.setFailed(`Unknown command: ${command}`)
+      }
     } else {
       core.setFailed(`Path is neither a file nor a directory: ${filePath}`)
     }
