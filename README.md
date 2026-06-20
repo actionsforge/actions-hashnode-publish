@@ -112,7 +112,7 @@ jobs:
   validate:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actionsforge/actions-hashnode-publish@v1
         with:
           command: validate  # Required: validate, draft, or publish
@@ -124,7 +124,7 @@ jobs:
     needs: validate
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actionsforge/actions-hashnode-publish@v1
         with:
           command: publish  # Required
