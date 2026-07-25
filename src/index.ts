@@ -258,7 +258,7 @@ export async function runCli(args: string[] = process.argv.slice(2)): Promise<vo
 
   const filePath = args[1]
   if (!filePath) {
-    // eslint-disable-next-line no-console
+     
     console.error('Error: File path is required')
     process.exit(1)
   }
@@ -273,7 +273,7 @@ export async function runCli(args: string[] = process.argv.slice(2)): Promise<vo
       if (stat.isDirectory()) {
         const files = findMarkdownFiles(filePath, recursive)
         if (files.length === 0) {
-          // eslint-disable-next-line no-console
+           
           console.error('❌ No markdown files found in directory')
           process.exit(1)
         }
@@ -288,10 +288,10 @@ export async function runCli(args: string[] = process.argv.slice(2)): Promise<vo
             console.log(`✅ ${file} is valid`)
           } else {
             hasErrors = true
-            // eslint-disable-next-line no-console
+             
             console.error(`❌ Validation errors in ${file}:`)
             result.errors.forEach(error => {
-              // eslint-disable-next-line no-console
+               
               console.error(`  - ${error}`)
             })
           }
@@ -307,10 +307,10 @@ export async function runCli(args: string[] = process.argv.slice(2)): Promise<vo
           // eslint-disable-next-line no-console
           console.log('✅ Markdown file is valid')
         } else {
-          // eslint-disable-next-line no-console
+           
           console.error('❌ Validation errors:')
           result.errors.forEach(error => {
-            // eslint-disable-next-line no-console
+             
             console.error(`  - ${error}`)
           })
           if (!continueOnError) {
@@ -326,7 +326,7 @@ export async function runCli(args: string[] = process.argv.slice(2)): Promise<vo
       const publicationId = args.find(arg => arg.startsWith('--publication-id='))?.split('=')[1] || process.env.PUBLICATION_ID
 
       if (!token || !publicationId) {
-        // eslint-disable-next-line no-console
+         
         console.error('Error: --token and --publication-id are required for publishing (or set TOKEN and PUBLICATION_ID env vars)')
         process.exit(1)
       }
@@ -334,10 +334,10 @@ export async function runCli(args: string[] = process.argv.slice(2)): Promise<vo
       // Validate markdown again before attempting API calls
       const validationResult = validateMarkdown(fileContent)
       if (!validationResult.isValid) {
-        // eslint-disable-next-line no-console
+         
         console.error('❌ Validation errors:')
         validationResult.errors.forEach(error => {
-          // eslint-disable-next-line no-console
+           
           console.error(`  - ${error}`)
         })
         process.exit(1)
@@ -390,7 +390,7 @@ export async function runCli(args: string[] = process.argv.slice(2)): Promise<vo
             existingDraftId: existingDraftId // Pass draft ID for publishing existing draft
           });
         } catch (error) {
-          // eslint-disable-next-line no-console
+           
           console.error('Error:', error instanceof Error ? error.message : 'Unknown API error');
           process.exit(1);
         }
@@ -418,12 +418,12 @@ export async function runCli(args: string[] = process.argv.slice(2)): Promise<vo
       fs.writeFileSync(filePath, newContent);
 
     } else {
-      // eslint-disable-next-line no-console
+       
       console.error(`Error: Unknown command "${command}"`)
       process.exit(1)
     }
   } catch (error) {
-    // eslint-disable-next-line no-console
+     
     console.error('Error:', error instanceof Error ? error.message : 'Unknown error')
     process.exit(1)
   }
