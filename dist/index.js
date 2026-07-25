@@ -22687,7 +22687,7 @@ var _summary = new Summary();
 // node_modules/@actions/core/lib/platform.js
 var import_os2 = __toESM(require("os"), 1);
 
-// node_modules/@actions/exec/node_modules/@actions/io/lib/io-util.js
+// node_modules/@actions/io/lib/io-util.js
 var fs2 = __toESM(require("fs"), 1);
 var { chmod, copyFile, lstat, mkdir, open, readdir, rename, rm, rmdir, stat, symlink, unlink } = fs2.promises;
 var IS_WINDOWS = process.platform === "win32";
