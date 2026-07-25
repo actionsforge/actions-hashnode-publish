@@ -12,7 +12,7 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint . --ext .ts",
+    "lint": "eslint .",
     "format": "prettier --write \"**/*.{ts,json,md}\"",
     "start": "node dist/index.js",
     "prepare": "npm run build"
@@ -32,11 +32,14 @@
     "@typescript-eslint/eslint-plugin": "^8.65.0",
     "@typescript-eslint/parser": "^8.61.1",
     "@vitest/coverage-v8": "^4.1.9",
-    "eslint": "^8.57.1",
+    "eslint": "^10.8.0",
     "ts-node": "^10.9.2",
     "tsup": "^8.5.0",
     "typescript": "^5.3.3",
-    "vitest": "^4.1.9"
+    "vitest": "^4.1.9",
+    "@eslint/js": "^9.39.2",
+    "globals": "^16.4.0",
+    "typescript-eslint": "^8.65.0"
   },
   "engines": {
     "node": ">=20.0.0"
