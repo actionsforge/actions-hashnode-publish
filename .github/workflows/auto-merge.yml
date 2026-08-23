@@ -14,4 +14,6 @@ permissions:
 jobs:
   auto-merge:
     uses: actionsforge/actions/.github/workflows/dependabot-auto-merge.yml@main
+    with:
+      use-github-auto-merge: false
     secrets: inherit
