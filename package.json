@@ -52,5 +52,8 @@
     "publishing"
   ],
   "author": "John Ajera",
-  "license": "MIT"
+  "license": "MIT",
+  "overrides": {
+    "esbuild": "0.28.1"
+  }
 }
